@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BANKR LAUNCH — AI NFT Launchpad</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #04040a;
+  --s1: #080810;
+  --s2: #0c0c18;
+  --border: #16162a;
+  --border2: #22223a;
+  --blue: #0052ff;
+  --blue2: #2979ff;
+  --blue3: #5399ff;
+  --green: #00e87a;
+  --orange: #ff6b00;
+  --red: #ff2d55;
+  --text: #f0f0fa;
+  --muted: #5a5a80;
+  --muted2: #3a3a5c;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Syne',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* NOISE TEXTURE */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;opacity:0.4;
+}
+
+/* ANIMATED BACKGROUND */
+.bg-anim{
+  position:fixed;inset:0;z-index:0;overflow:hidden;
+}
+.bg-anim::before{
+  content:'';position:absolute;
+  width:600px;height:600px;
+  background:radial-gradient(circle, rgba(0,82,255,0.08) 0%, transparent 70%);
+  top:-200px;right:-100px;
+  animation:bgFloat1 12s ease-in-out infinite;
+}
+.bg-anim::after{
+  content:'';position:absolute;
+  width:400px;height:400px;
+  background:radial-gradient(circle, rgba(0,232,122,0.05) 0%, transparent 70%);
+  bottom:-100px;left:-100px;
+  animation:bgFloat2 10s ease-in-out infinite;
+}
+@keyframes bgFloat1{0%,100%{transform:translate(0,0)}50%{transform:translate(-50px,80px)}}
+@keyframes bgFloat2{0%,100%{transform:translate(0,0)}50%{transform:translate(60px,-40px)}}
+
+/* GRID BG */
+.grid-bg{
+  position:fixed;inset:0;z-index:0;
+  background-image:
+    linear-gradient(rgba(0,82,255,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,82,255,0.03) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+
+/* LAYOUT */
+.page{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 24px}
+
+/* NAV */
+nav{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:20px 0;border-bottom:1px solid var(--border);
+}
+.logo{
+  font-size:22px;font-weight:800;letter-spacing:-0.5px;
+  display:flex;align-items:center;gap:10px;
+}
+.logo-icon{
+  width:32px;height:32px;
+  background:linear-gradient(135deg,var(--blue),var(--blue2));
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;
+}
+.logo em{color:var(--blue2);font-style:normal}
+.nav-right{display:flex;align-items:center;gap:12px}
+.base-pill{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 14px;
+  border:1px solid var(--border2);
+  border-radius:99px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--muted);
+}
+.base-dot{width:6px;height:6px;background:#3478f6;border-radius:50%;animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+.btn{
+  font-family:'Syne',sans-serif;
+  font-size:13px;font-weight:700;
+  padding:10px 20px;border:none;
+  border-radius:8px;cursor:pointer;
+  transition:all 0.2s;letter-spacing:0.3px;
+}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue2);transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,82,255,0.35)}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--border2)}
+.btn-ghost:hover{border-color:var(--blue3);color:var(--blue3)}
+.btn-green{background:var(--green);color:#000}
+.btn-green:hover{opacity:0.88;transform:translateY(-1px);box-shadow:0 6px 24px rgba(0,232,122,0.3)}
+.btn:disabled{opacity:0.3;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+
+/* HERO */
+.hero{padding:72px 0 56px;text-align:center}
+.hero-label{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--green);letter-spacing:2px;
+  padding:6px 16px;
+  border:1px solid rgba(0,232,122,0.2);border-radius:99px;
+  margin-bottom:24px;
+}
+.hero h1{
+  font-size:clamp(52px,9vw,100px);
+  font-weight:800;line-height:0.95;
+  letter-spacing:-3px;margin-bottom:24px;
+}
+.hero h1 span{
+  display:block;
+  background:linear-gradient(135deg,#fff 30%,var(--blue3));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero h1 .alt{
+  -webkit-text-fill-color:transparent;
+  -webkit-text-stroke:1.5px var(--border2);
+  background:none;
+}
+.hero-desc{
+  font-size:16px;color:var(--muted);max-width:520px;
+  margin:0 auto 40px;line-height:1.75;font-weight:400;
+}
+.hero-ctas{display:flex;gap:12px;justify-content:center}
+
+/* TABS */
+.tabs{
+  display:flex;gap:2px;
+  background:var(--s1);
+  border:1px solid var(--border);border-radius:12px;
+  padding:4px;margin-bottom:32px;max-width:400px;
+}
+.tab{
+  flex:1;padding:10px 16px;border:none;border-radius:8px;
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:700;
+  cursor:pointer;background:transparent;color:var(--muted);
+  transition:all 0.2s;
+}
+.tab.active{background:var(--blue);color:#fff}
+.tab:hover:not(.active){color:var(--text)}
+
+/* === LAUNCH PAGE (Creator) === */
+#launchView{display:block}
+#exploreView{display:none}
+#collectionView{display:none}
+
+.launch-grid{
+  display:grid;grid-template-columns:1fr 420px;
+  gap:24px;margin-bottom:60px;
+}
+
+.card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:16px;overflow:hidden;
+}
+.card-header{
+  padding:20px 24px 0;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--muted);letter-spacing:2px;
+  text-transform:uppercase;margin-bottom:16px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-body{padding:0 24px 24px}
+
+/* PROMPT INPUT */
+.prompt-wrap{
+  position:relative;
+  background:var(--bg);
+  border:1px solid var(--border);border-radius:12px;
+  padding:16px;margin-bottom:16px;
+  transition:border-color 0.2s;
+}
+.prompt-wrap:focus-within{border-color:var(--blue)}
+.prompt-wrap textarea{
+  width:100%;background:transparent;border:none;outline:none;
+  font-family:'Syne',sans-serif;font-size:15px;font-weight:400;
+  color:var(--text);resize:none;line-height:1.6;
+  min-height:100px;
+}
+.prompt-wrap textarea::placeholder{color:var(--muted2)}
+.prompt-actions{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:12px;padding-top:12px;
+  border-top:1px solid var(--border);
+}
+.char-count{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+.prompt-hint{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5}
+.prompt-hint span{color:var(--blue3)}
+
+/* EXAMPLE PROMPTS */
+.example-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.chip{
+  padding:6px 12px;background:var(--s2);
+  border:1px solid var(--border2);border-radius:99px;
+  font-size:12px;color:var(--muted);cursor:pointer;
+  transition:all 0.15s;white-space:nowrap;
+}
+.chip:hover{border-color:var(--blue3);color:var(--blue3)}
+
+/* UPLOAD ZONE */
+.upload-zone{
+  border:2px dashed var(--border2);border-radius:12px;
+  padding:32px;text-align:center;cursor:pointer;
+  transition:all 0.2s;margin-bottom:16px;
+}
+.upload-zone:hover{border-color:var(--blue);background:rgba(0,82,255,0.03)}
+.upload-zone.has-file{border-style:solid;border-color:var(--green);background:rgba(0,232,122,0.03)}
+.upload-icon{font-size:32px;margin-bottom:8px}
+.upload-title{font-weight:700;margin-bottom:4px}
+.upload-sub{font-size:12px;color:var(--muted)}
+
+/* OR divider */
+.or-div{
+  display:flex;align-items:center;gap:12px;margin:20px 0;
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted2);
+}
+.or-div::before,.or-div::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* COLLECTION SETTINGS */
+.setting-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 0;border-bottom:1px solid var(--border);
+}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:13px;font-weight:700}
+.setting-sub{font-size:11px;color:var(--muted);margin-top:2px;font-weight:400}
+.setting-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:13px;color:var(--blue3);font-weight:700;
+}
+.setting-input{
+  background:var(--bg);border:1px solid var(--border2);
+  border-radius:6px;padding:6px 10px;
+  font-family:'JetBrains Mono',monospace;font-size:13px;
+  color:var(--text);outline:none;width:140px;
+  transition:border-color 0.2s;
+}
+.setting-input:focus{border-color:var(--blue)}
+
+/* COST BREAKDOWN */
+.cost-box{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:12px;padding:16px;margin-bottom:20px;
+}
+.cost-row{
+  display:flex;justify-content:space-between;
+  font-size:13px;padding:4px 0;
+}
+.cost-row.total{
+  border-top:1px solid var(--border);margin-top:8px;padding-top:12px;
+  font-weight:700;font-size:15px;
+}
+.cost-row .label{color:var(--muted)}
+.cost-row .val{font-family:'JetBrains Mono',monospace;color:var(--text)}
+.cost-row.total .val{color:var(--green)}
+
+/* LAUNCH BTN */
+.launch-btn{
+  width:100%;padding:18px;
+  background:linear-gradient(135deg,var(--blue) 0%,#0033cc 100%);
+  border:none;border-radius:12px;cursor:pointer;
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:800;
+  color:#fff;letter-spacing:0.5px;
+  transition:all 0.2s;position:relative;overflow:hidden;
+}
+.launch-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.1),transparent);
+}
+.launch-btn:hover:not(:disabled){
+  transform:translateY(-2px);
+  box-shadow:0 12px 40px rgba(0,82,255,0.45);
+}
+.launch-btn:disabled{opacity:0.4;cursor:not-allowed}
+
+/* PREVIEW PANEL */
+.preview-panel{position:sticky;top:24px}
+.preview-canvas{
+  width:100%;aspect-ratio:1;
+  background:linear-gradient(135deg,#070712,#0d1530,#070712);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+.preview-canvas canvas{
+  position:absolute;inset:0;width:100%;height:100%;
+}
+.preview-placeholder{
+  text-align:center;position:relative;z-index:1;
+}
+.preview-art{
+  width:100%;height:100%;position:absolute;
+  display:flex;align-items:center;justify-content:center;
+}
+/* Animated placeholder art */
+.art-rings{position:relative;width:160px;height:160px}
+.ring{
+  position:absolute;border-radius:50%;border:1px solid;
+  animation:ringPulse 3s ease-in-out infinite;
+}
+.ring:nth-child(1){inset:0;border-color:rgba(0,82,255,0.3);animation-delay:0s}
+.ring:nth-child(2){inset:20px;border-color:rgba(0,82,255,0.2);animation-delay:0.4s}
+.ring:nth-child(3){inset:40px;border-color:rgba(0,82,255,0.15);animation-delay:0.8s}
+.ring:nth-child(4){inset:60px;border-color:rgba(0,232,122,0.2);animation-delay:1.2s}
+.ring-center{
+  position:absolute;inset:70px;
+  background:linear-gradient(135deg,var(--blue),var(--blue2));
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:800;
+  animation:ringPulse 2s ease-in-out infinite;
+}
+@keyframes ringPulse{0%,100%{transform:scale(1);opacity:0.7}50%{transform:scale(1.05);opacity:1}}
+
+.preview-label{
+  position:absolute;bottom:16px;left:16px;right:16px;
+  display:flex;justify-content:space-between;
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);
+}
+
+.preview-info{padding:16px 20px}
+.preview-name{font-size:18px;font-weight:800;margin-bottom:4px}
+.preview-prompt-text{
+  font-size:12px;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-bottom:12px;
+}
+.preview-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border)}
+.ps-item{background:var(--s1);padding:12px 10px;text-align:center}
+.ps-val{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--blue3)}
+.ps-key{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* GENERATING STATE */
+.generating-overlay{
+  position:fixed;inset:0;
+  background:rgba(4,4,10,0.92);
+  backdrop-filter:blur(16px);
+  z-index:100;
+  display:none;
+  flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;
+}
+.generating-overlay.show{display:flex}
+.gen-icon{font-size:48px;margin-bottom:24px;animation:genBounce 1s ease-in-out infinite}
+@keyframes genBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.gen-title{font-size:32px;font-weight:800;margin-bottom:8px}
+.gen-sub{color:var(--muted);margin-bottom:32px;font-size:14px}
+.gen-bar-wrap{
+  width:320px;height:6px;background:var(--border);
+  border-radius:99px;overflow:hidden;margin-bottom:12px;
+}
+.gen-bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:99px;width:0%;transition:width 0.3s}
+.gen-count{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted)}
+.gen-current{
+  width:200px;height:200px;
+  background:var(--s1);border:1px solid var(--border2);
+  border-radius:16px;margin:24px auto 0;
+  overflow:hidden;display:flex;align-items:center;justify-content:center;
+  font-size:48px;
+}
+
+/* === EXPLORE PAGE (Collections) === */
+.explore-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:24px;
+}
+.explore-title{font-size:32px;font-weight:800}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap}
+.filter-chip{
+  padding:7px 16px;background:var(--s1);
+  border:1px solid var(--border);border-radius:99px;
+  font-size:12px;cursor:pointer;transition:all 0.15s;font-weight:700;
+}
+.filter-chip.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.filter-chip:hover:not(.active){border-color:var(--border2);color:var(--text)}
+
+.collections-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:16px;margin-bottom:60px;
+}
+
+.coll-card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;cursor:pointer;
+  transition:all 0.2s;
+}
+.coll-card:hover{border-color:var(--blue3);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,0.4)}
+.coll-cover{
+  width:100%;aspect-ratio:1;position:relative;overflow:hidden;
+}
+.coll-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  grid-template-rows:1fr 1fr;height:100%;
+}
+.coll-grid-item{
+  display:flex;align-items:center;justify-content:center;
+  font-size:28px;
+  border:0.5px solid rgba(255,255,255,0.05);
+}
+.coll-body{padding:14px}
+.coll-name{font-size:15px;font-weight:800;margin-bottom:4px}
+.coll-prompt-preview{
+  font-size:11px;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  margin-bottom:12px;
+}
+.coll-footer{
+  display:flex;justify-content:space-between;align-items:center;
+}
+.coll-progress-mini{
+  flex:1;height:3px;background:var(--border);
+  border-radius:99px;overflow:hidden;margin:0 10px;
+}
+.coll-progress-fill{height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:99px}
+.coll-minted{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+.coll-price-badge{
+  padding:4px 10px;
+  background:rgba(0,82,255,0.1);border:1px solid rgba(0,82,255,0.2);
+  border-radius:99px;font-family:'JetBrains Mono',monospace;
+  font-size:11px;color:var(--blue3);font-weight:700;
+}
+.hot-badge{
+  position:absolute;top:10px;left:10px;
+  padding:4px 10px;background:var(--orange);
+  border-radius:99px;font-size:10px;font-weight:800;color:#fff;
+  letter-spacing:1px;
+}
+.new-badge{
+  position:absolute;top:10px;left:10px;
+  padding:4px 10px;background:var(--green);
+  border-radius:99px;font-size:10px;font-weight:800;color:#000;
+  letter-spacing:1px;
+}
+
+/* === COLLECTION DETAIL === */
+.back-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:13px;color:var(--muted);cursor:pointer;
+  margin-bottom:24px;transition:color 0.2s;border:none;background:none;font-family:'Syne',sans-serif;
+}
+.back-btn:hover{color:var(--text)}
+
+.detail-grid{
+  display:grid;grid-template-columns:1fr 380px;
+  gap:24px;margin-bottom:40px;
+}
+.detail-left{}
+.detail-header{margin-bottom:20px}
+.detail-name{font-size:40px;font-weight:800;line-height:1;margin-bottom:8px}
+.detail-by{font-size:13px;color:var(--muted)}
+.detail-by span{color:var(--blue3);font-family:'JetBrains Mono',monospace}
+.detail-prompt-box{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:var(--muted);line-height:1.6;margin-bottom:20px;
+}
+.detail-prompt-box::before{
+  content:'"';color:var(--blue3);font-size:20px;line-height:1;
+}
+.detail-stats{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:12px;margin-bottom:20px;
+}
+.ds-item{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:10px;padding:14px;
+}
+.ds-val{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700;color:var(--text)}
+.ds-key{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* NFT GRID */
+.nft-grid-label{
+  display:flex;justify-content:space-between;
+  margin-bottom:12px;font-size:13px;color:var(--muted);
+  font-family:'JetBrains Mono',monospace;
+}
+.nfts-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+.nft-thumb{
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:10px;overflow:hidden;cursor:pointer;
+  transition:all 0.15s;aspect-ratio:1;
+  display:flex;align-items:center;justify-content:center;
+  font-size:32px;position:relative;
+}
+.nft-thumb:hover{border-color:var(--blue3);transform:scale(1.03)}
+.nft-thumb .nft-num{
+  position:absolute;bottom:6px;right:8px;
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:rgba(255,255,255,0.4);
+}
+.nft-thumb.sold{opacity:0.5}
+.nft-thumb.sold::after{
+  content:'SOLD';
+  position:absolute;inset:0;
+  background:rgba(0,0,0,0.6);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:800;letter-spacing:2px;color:var(--muted);
+}
+
+/* MINT SIDEBAR */
+.mint-sidebar{position:sticky;top:24px}
+.mint-hero-img{
+  width:100%;aspect-ratio:1;
+  border-radius:12px;overflow:hidden;
+  margin-bottom:16px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:80px;
+  background:linear-gradient(135deg,var(--s2),var(--bg));
+  border:1px solid var(--border);
+  position:relative;
+}
+.mint-nft-id{
+  position:absolute;top:12px;left:12px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  background:rgba(0,0,0,0.7);padding:4px 10px;border-radius:99px;
+  color:var(--muted);
+}
+.mint-info-card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:12px;padding:20px;margin-bottom:12px;
+}
+.mint-price-row{
+  display:flex;justify-content:space-between;
+  align-items:flex-end;margin-bottom:16px;
+}
+.mint-price-label{font-size:12px;color:var(--muted);margin-bottom:4px}
+.mint-price-amount{
+  font-family:'JetBrains Mono',monospace;
+  font-size:36px;font-weight:700;color:var(--text);line-height:1;
+}
+.mint-price-token{font-size:14px;color:var(--blue3);margin-left:4px}
+.mint-next{font-size:12px;color:var(--muted)}
+.mint-next span{color:var(--orange)}
+
+.mint-progress{margin-bottom:20px}
+.mint-prog-top{
+  display:flex;justify-content:space-between;
+  font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--muted);margin-bottom:8px;
+}
+.mint-prog-bar{height:8px;background:var(--border);border-radius:99px;overflow:hidden}
+.mint-prog-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--blue),var(--green));
+  border-radius:99px;transition:width 0.5s;
+}
+
+.approve-mint-btns{display:flex;flex-direction:column;gap:8px}
+.full-btn{
+  width:100%;padding:16px;border:none;border-radius:10px;
+  font-family:'Syne',sans-serif;font-size:16px;font-weight:800;
+  cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;letter-spacing:0.3px;
+}
+.full-btn.blue{background:linear-gradient(135deg,var(--blue),#0033cc);color:#fff}
+.full-btn.blue:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,82,255,0.4)}
+.full-btn.outline{background:transparent;border:1px solid var(--border2);color:var(--text)}
+.full-btn.outline:hover:not(:disabled){border-color:var(--blue3);color:var(--blue3)}
+.full-btn:disabled{opacity:0.35;cursor:not-allowed;transform:none}
+.full-btn .btn-shine{
+  position:absolute;top:0;left:-100%;width:50%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);
+  animation:btnShine 3s ease-in-out infinite;
+}
+@keyframes btnShine{0%{left:-100%}50%,100%{left:150%}}
+
+/* TX STATUS */
+.tx-row{
+  display:none;align-items:center;gap:10px;
+  padding:10px 14px;background:rgba(0,82,255,0.06);
+  border:1px solid rgba(0,82,255,0.15);border-radius:8px;
+  font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue3);
+  margin-bottom:8px;
+}
+.tx-row.show{display:flex}
+.spin{
+  width:14px;height:14px;border:2px solid rgba(0,82,255,0.2);
+  border-top-color:var(--blue);border-radius:50%;
+  animation:spin 0.7s linear infinite;flex-shrink:0;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* TOAST */
+.toast{
+  position:fixed;bottom:28px;right:28px;
+  background:var(--s1);border:1px solid var(--border2);
+  border-radius:10px;padding:14px 18px;
+  font-family:'JetBrains Mono',monospace;font-size:12px;
+  color:var(--text);z-index:9998;
+  transform:translateY(60px);opacity:0;
+  transition:all 0.3s;max-width:320px;
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:var(--green);color:var(--green)}
+.toast.error{border-color:var(--red);color:var(--red)}
+
+/* SUCCESS MODAL */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(4,4,10,0.88);
+  backdrop-filter:blur(12px);z-index:200;
+  display:none;align-items:center;justify-content:center;
+}
+.modal-bg.show{display:flex}
+.modal{
+  background:var(--s1);border:1px solid var(--border2);
+  border-radius:20px;padding:40px;max-width:400px;width:90%;
+  text-align:center;
+  animation:modalIn 0.3s ease;
+}
+@keyframes modalIn{from{transform:scale(0.9) translateY(20px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.modal-emoji{font-size:56px;margin-bottom:20px;display:block}
+.modal h2{font-size:30px;font-weight:800;margin-bottom:8px}
+.modal p{color:var(--muted);font-size:14px;line-height:1.6;margin-bottom:24px}
+.modal-tag{
+  display:inline-block;padding:8px 20px;
+  background:rgba(0,82,255,0.1);border:1px solid rgba(0,82,255,0.25);
+  border-radius:8px;font-family:'JetBrains Mono',monospace;
+  font-size:13px;color:var(--blue3);margin-bottom:24px;
+}
+.modal-close{
+  width:100%;padding:14px;
+  background:var(--green);border:none;border-radius:10px;
+  font-family:'Syne',sans-serif;font-size:16px;font-weight:800;
+  color:#000;cursor:pointer;transition:opacity 0.2s;
+}
+.modal-close:hover{opacity:0.85}
+
+/* Wallet connected pill */
+.wallet-pill{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 16px;
+  background:rgba(0,232,122,0.08);border:1px solid rgba(0,232,122,0.2);
+  border-radius:99px;font-family:'JetBrains Mono',monospace;
+  font-size:12px;color:var(--green);
+}
+.wallet-dot{width:6px;height:6px;background:var(--green);border-radius:50%}
+
+@media(max-width:900px){
+  .launch-grid,.detail-grid{grid-template-columns:1fr}
+  .collections-grid{grid-template-columns:repeat(2,1fr)}
+  .nfts-grid{grid-template-columns:repeat(4,1fr)}
+  .detail-stats{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:600px){
+  .hero h1{font-size:52px}
+  .collections-grid{grid-template-columns:1fr}
+  nav{flex-wrap:wrap;gap:10px}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-anim"></div>
+<div class="grid-bg"></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <span class="modal-emoji">🎉</span>
+    <h2 id="modalTitle">MINTED!</h2>
+    <p id="modalDesc">You just minted an NFT from this collection. The next mint will cost more — share before it's gone!</p>
+    <div class="modal-tag" id="modalTag">NFT #1 — 1 $BANKR</div>
+    <button class="modal-close" onclick="closeModal()">CLOSE</button>
+  </div>
+</div>
+
+<!-- GENERATING OVERLAY -->
+<div class="generating-overlay" id="genOverlay">
+  <div class="gen-icon">🎨</div>
+  <div class="gen-title">GENERATING COLLECTION</div>
+  <div class="gen-sub">AI is creating 1,000 unique NFTs from your prompt…</div>
+  <div class="gen-bar-wrap">
+    <div class="gen-bar" id="genBar"></div>
+  </div>
+  <div class="gen-count" id="genCount">0 / 1000</div>
+  <div class="gen-current" id="genCurrent">🖼️</div>
+</div>
+
+<div class="page">
+  <!-- NAV -->
+  <nav>
+    <div class="logo">
+      <div class="logo-icon">⚡</div>
+      BANKR<em>LAUNCH</em>
+    </div>
+    <div class="nav-right">
+      <div class="base-pill"><div class="base-dot"></div>BASE</div>
+      <button class="btn btn-primary" id="connectBtn" onclick="connectWallet()">CONNECT WALLET</button>
+    </div>
+  </nav>
+
+  <!-- HERO (only on launch tab) -->
+  <div class="hero" id="heroSection">
+    <div class="hero-label">⚡ AI-POWERED · BUILT ON BASE · PAY WITH $BANKR</div>
+    <h1>
+      <span>LAUNCH YOUR</span>
+      <span class="alt">NFT DROP</span>
+    </h1>
+    <p class="hero-desc">Write a prompt. Pay in $BANKR. AI generates 1,000 unique NFTs. Buyers mint with tiered pricing — earlier = cheaper.</p>
+    <div class="hero-ctas">
+      <button class="btn btn-primary" onclick="switchTab('launch')">CREATE COLLECTION</button>
+      <button class="btn btn-ghost" onclick="switchTab('explore')">EXPLORE DROPS</button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" id="tab-launch" onclick="switchTab('launch')">🚀 LAUNCH</button>
+    <button class="tab" id="tab-explore" onclick="switchTab('explore')">🔥 EXPLORE</button>
+  </div>
+
+  <!-- ===== LAUNCH VIEW ===== -->
+  <div id="launchView">
+    <div class="launch-grid">
+
+      <!-- LEFT: Input -->
+      <div>
+        <!-- PROMPT -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <span>YOUR PROMPT</span>
+            <span style="color:var(--blue3)">STEP 1</span>
+          </div>
+          <div class="card-body">
+            <p class="prompt-hint">Describe your collection. AI will generate <span>1,000 unique variations</span> based on your prompt.</p>
+            <div class="prompt-wrap">
+              <textarea id="promptInput" placeholder="e.g. A cyberpunk samurai in neon Tokyo, various armor colors and weapons, anime style, highly detailed..." maxlength="500" oninput="onPromptChange()"></textarea>
+              <div class="prompt-actions">
+                <span class="char-count"><span id="charCount">0</span>/500</span>
+                <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" onclick="clearPrompt()">CLEAR</button>
+              </div>
+            </div>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Try an example:</p>
+            <div class="example-chips">
+              <div class="chip" onclick="setPrompt('Solarpunk warrior goddess with flowing energy hair, vibrant neon colors, cosmic background, detailed')">⚡ Solarpunk Warrior</div>
+              <div class="chip" onclick="setPrompt('Cute baby dragon with different elemental types, fire ice lightning earth, pixel art style, kawaii')">🐲 Baby Dragon</div>
+              <div class="chip" onclick="setPrompt('Abstract geometric skull with different color palettes and patterns, dark luxury aesthetic')">💀 Geo Skull</div>
+              <div class="chip" onclick="setPrompt('Retro astronaut exploring alien planets, vintage 70s sci-fi poster style, various planets and suits')">🚀 Space Explorer</div>
+              <div class="chip" onclick="setPrompt('Mysterious hooded figure with glowing runes, dark fantasy setting, various magical elements')">🧙 Dark Mage</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- OR UPLOAD -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <span>OR UPLOAD BASE IMAGE</span>
+            <span style="color:var(--blue3)">OPTIONAL</span>
+          </div>
+          <div class="card-body">
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+              <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileUpload(this)">
+              <div class="upload-icon" id="uploadIcon">📁</div>
+              <div class="upload-title" id="uploadTitle">Drop image or click to upload</div>
+              <div class="upload-sub" id="uploadSub">PNG, JPG, GIF · Max 10MB · AI will use as style reference</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLLECTION SETTINGS -->
+        <div class="card">
+          <div class="card-header">
+            <span>COLLECTION SETTINGS</span>
+            <span style="color:var(--blue3)">STEP 2</span>
+          </div>
+          <div class="card-body">
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Collection Name</div>
+                <div class="setting-sub">Displayed on the mint page</div>
+              </div>
+              <input class="setting-input" id="collName" placeholder="My Collection" oninput="updatePreview()">
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Total Supply</div>
+                <div class="setting-sub">Fixed at 1,000 NFTs</div>
+              </div>
+              <div class="setting-val">1,000</div>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Starting Price</div>
+                <div class="setting-sub">NFT #1 costs this, +1 each mint</div>
+              </div>
+              <div class="setting-val">1 $BANKR</div>
+            </div>
+            <div class="setting-row">
+              <div>
+                <div class="setting-label">Max Price (NFT #1000)</div>
+              </div>
+              <div class="setting-val">1,000 $BANKR</div>
+            </div>
+            <div class="setting-row" style="border-bottom:none">
+              <div>
+                <div class="setting-label">Creator Royalty</div>
+                <div class="setting-sub">% of each sale goes to you</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <input class="setting-input" id="royaltyInput" type="number" min="0" max="15" value="5" style="width:60px;text-align:right">
+                <span style="color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:13px">%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Preview + Launch -->
+      <div class="preview-panel">
+        <div class="card">
+          <!-- NFT PREVIEW CANVAS -->
+          <div class="preview-canvas">
+            <div class="preview-art">
+              <div class="art-rings">
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring-center">AI</div>
+              </div>
+            </div>
+            <div class="preview-label">
+              <span>PREVIEW</span>
+              <span id="previewChain">BASE NETWORK</span>
+            </div>
+          </div>
+
+          <div class="preview-info">
+            <div class="preview-name" id="previewName">Your Collection</div>
+            <div class="preview-prompt-text" id="previewPromptText">Enter a prompt to see preview…</div>
+            <div class="preview-stats">
+              <div class="ps-item">
+                <div class="ps-val">1,000</div>
+                <div class="ps-key">SUPPLY</div>
+              </div>
+              <div class="ps-item">
+                <div class="ps-val">1</div>
+                <div class="ps-key">START PRICE</div>
+              </div>
+              <div class="ps-item">
+                <div class="ps-val" id="prevRoyalty">5%</div>
+                <div class="ps-key">ROYALTY</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- COST BOX -->
+          <div style="padding:0 20px">
+            <div class="cost-box">
+              <div class="cost-row">
+                <span class="label">AI Generation Fee</span>
+                <span class="val">50 $BANKR</span>
+              </div>
+              <div class="cost-row">
+                <span class="label">Platform Fee</span>
+                <span class="val">10 $BANKR</span>
+              </div>
+              <div class="cost-row">
+                <span class="label">Deploy Gas (Est)</span>
+                <span class="val">~$0.05</span>
+              </div>
+              <div class="cost-row total">
+                <span class="label">TOTAL TO LAUNCH</span>
+                <span class="val">60 $BANKR</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- LAUNCH BTN -->
+          <div style="padding:0 20px 20px">
+            <div class="tx-row" id="launchTxRow">
+              <div class="spin"></div>
+              <span id="launchTxText">Processing…</span>
+            </div>
+            <button class="launch-btn" id="launchBtn" onclick="launchCollection()" disabled>
+              LAUNCH COLLECTION
+            </button>
+            <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:10px">
+              Connect wallet + enter prompt to enable
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== EXPLORE VIEW ===== -->
+  <div id="exploreView">
+    <div class="explore-header">
+      <div class="explore-title">ALL DROPS</div>
+      <div class="filter-row">
+        <div class="filter-chip active" onclick="setFilter(this,'all')">ALL</div>
+        <div class="filter-chip" onclick="setFilter(this,'hot')">🔥 HOT</div>
+        <div class="filter-chip" onclick="setFilter(this,'new')">✨ NEW</div>
+        <div class="filter-chip" onclick="setFilter(this,'ending')">⏳ ENDING</div>
+      </div>
+    </div>
+    <div class="collections-grid" id="collectionsGrid">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- ===== COLLECTION DETAIL VIEW ===== -->
+  <div id="collectionView">
+    <button class="back-btn" onclick="switchTab('explore')">← BACK TO EXPLORE</button>
+    <div class="detail-grid">
+      <!-- LEFT -->
+      <div class="detail-left">
+        <div class="detail-header">
+          <div class="detail-name" id="detailName">Collection Name</div>
+          <div class="detail-by">by <span id="detailCreator">0x1234...5678</span></div>
+        </div>
+        <div class="detail-prompt-box" id="detailPrompt">prompt text here</div>
+        <div class="detail-stats">
+          <div class="ds-item"><div class="ds-val" id="dsMinted">42</div><div class="ds-key">MINTED</div></div>
+          <div class="ds-item"><div class="ds-val">1,000</div><div class="ds-key">SUPPLY</div></div>
+          <div class="ds-item"><div class="ds-val" id="dsPrice">42 $B</div><div class="ds-key">CURRENT PRICE</div></div>
+          <div class="ds-item"><div class="ds-val" id="dsRoyalty">5%</div><div class="ds-key">ROYALTY</div></div>
+        </div>
+        <div class="nft-grid-label">
+          <span>ALL NFTS (1,000)</span>
+          <span id="nftGridStatus">42 sold · 958 available</span>
+        </div>
+        <div class="nfts-grid" id="nftsGrid">
+          <!-- populated -->
+        </div>
+      </div>
+      <!-- RIGHT: MINT SIDEBAR -->
+      <div class="mint-sidebar">
+        <div class="mint-hero-img" id="mintHeroImg">
+          <span class="mint-nft-id" id="mintNftId">NFT #43</span>
+          <span id="mintHeroEmoji" style="font-size:80px">🎨</span>
+        </div>
+        <div class="mint-info-card">
+          <div class="mint-price-row">
+            <div>
+              <div class="mint-price-label">CURRENT MINT PRICE</div>
+              <div>
+                <span class="mint-price-amount" id="mintPriceAmount">43</span>
+                <span class="mint-price-token">$BANKR</span>
+              </div>
+            </div>
+          </div>
+          <div class="mint-next">Next price: <span id="mintNextPrice">44 $BANKR</span></div>
+          <div style="height:1px;background:var(--border);margin:16px 0"></div>
+          <div class="mint-progress">
+            <div class="mint-prog-top">
+              <span id="mintProgLabel">42 / 1000 minted</span>
+              <span id="mintProgPct">4.2%</span>
+            </div>
+            <div class="mint-prog-bar">
+              <div class="mint-prog-fill" id="mintProgFill" style="width:4.2%"></div>
+            </div>
+          </div>
+          <div class="approve-mint-btns">
+            <div class="tx-row" id="mintTxRow">
+              <div class="spin"></div>
+              <span id="mintTxText">Confirm in wallet…</span>
+            </div>
+            <button class="full-btn outline" id="approveBtn" onclick="approveToken()" disabled>
+              APPROVE $BANKR
+            </button>
+            <button class="full-btn blue" id="mintBtn" onclick="doMint()" disabled>
+              <div class="btn-shine"></div>
+              MINT NFT
+            </button>
+          </div>
+        </div>
+        <p style="font-size:11px;color:var(--muted2);text-align:center;line-height:1.5">
+          Price increases by 1 $BANKR after each mint.<br>Connect wallet to mint.
+        </p>
+      </div>
+    </div>
+  </div>
+</div><!-- end .page -->
+
+<script>
+// =========================================================
+// STATE
+// =========================================================
+let walletAddress = null;
+let isConnected = false;
+let isApproved = false;
+let currentView = 'launch';
+let activeCollection = null;
+
+// Mock collections data
+const collections = [
+  {
+    id: 1, name: "CYBER SAMURAI", emoji: "⚔️",
+    prompt: "A cyberpunk samurai in neon Tokyo, various armor colors and katanas",
+    creator: "0x1a2b...3c4d", minted: 247, supply: 1000,
+    price: 248, royalty: 5, hot: true, new: false,
+    colors: ["#0d1a3a","#1a0d3a","#0d3a1a","#3a1a0d"]
+  },
+  {
+    id: 2, name: "BABY DRAGONS", emoji: "🐲",
+    prompt: "Cute baby dragon with different elemental types, pixel art style",
+    creator: "0x9f8e...7d6c", minted: 89, supply: 1000,
+    price: 90, royalty: 7, hot: false, new: true,
+    colors: ["#3a0d0d","#0d3a2a","#0d1a3a","#2a3a0d"]
+  },
+  {
+    id: 3, name: "GEO SKULLS", emoji: "💀",
+    prompt: "Abstract geometric skull with different color palettes and patterns",
+    creator: "0xab12...cd34", minted: 512, supply: 1000,
+    price: 513, royalty: 4, hot: true, new: false,
+    colors: ["#1a1a1a","#2a0d2a","#0d2a2a","#2a2a0d"]
+  },
+  {
+    id: 4, name: "SPACE EXPLORERS", emoji: "🚀",
+    prompt: "Retro astronaut exploring alien planets, vintage 70s sci-fi poster style",
+    creator: "0xef56...gh78", minted: 33, supply: 1000,
+    price: 34, royalty: 6, hot: false, new: true,
+    colors: ["#0a0a2a","#1a0a2a","#0a1a2a","#2a1a0a"]
+  },
+  {
+    id: 5, name: "DARK MAGES", emoji: "🧙",
+    prompt: "Mysterious hooded figure with glowing runes, dark fantasy setting",
+    creator: "0xc3d4...e5f6", minted: 778, supply: 1000,
+    price: 779, royalty: 5, hot: true, new: false,
+    colors: ["#1a0d2a","#0d1a2a","#2a0d1a","#1a2a0d"]
+  },
+  {
+    id: 6, name: "PIXEL PUNKS", emoji: "👾",
+    prompt: "8-bit pixel art punk characters with different accessories and hair",
+    creator: "0xa1b2...c3d4", minted: 156, supply: 1000,
+    price: 157, royalty: 3, hot: false, new: false,
+    colors: ["#0d2a0d","#2a0d0d","#0d0d2a","#2a2a0d"]
+  },
+];
+
+// NFT emoji sets per collection
+const emojiSets = {
+  1: ["⚔️","🗡️","🔱","🛡️","⚡","🌐","💎","🔷"],
+  2: ["🐲","🔥","❄️","⚡","🌊","🌿","💨","🌟"],
+  3: ["💀","💜","🔮","⚫","🖤","💀","🌑","🕳️"],
+  4: ["🚀","🌍","🪐","⭐","🌙","☄️","🛸","🌌"],
+  5: ["🧙","🔮","✨","🌑","⚗️","🕯️","📜","💫"],
+  6: ["👾","🎮","🕹️","💾","📺","🎲","💻","🃏"],
+};
+
+// =========================================================
+// WALLET
+// =========================================================
+async function connectWallet() {
+  if (!window.ethereum) {
+    showToast("Install MetaMask or Coinbase Wallet!", "error");
+    return;
+  }
+  try {
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    walletAddress = accounts[0];
+    isConnected = true;
+
+    const btn = document.getElementById('connectBtn');
+    btn.outerHTML = `<div class="wallet-pill"><div class="wallet-dot"></div>${walletAddress.slice(0,6)}...${walletAddress.slice(-4)}</div>`;
+
+    checkLaunchReady();
+    document.getElementById('approveBtn').disabled = false;
+    showToast("Wallet connected ✓", "success");
+  } catch(e) {
+    showToast(e.message?.slice(0,50) || "Connection failed", "error");
+  }
+}
+
+// =========================================================
+// TABS
+// =========================================================
+function switchTab(tab) {
+  currentView = tab;
+  document.getElementById('launchView').style.display = tab === 'launch' ? 'block' : 'none';
+  document.getElementById('exploreView').style.display = tab === 'explore' ? 'block' : 'none';
+  document.getElementById('collectionView').style.display = tab === 'collection' ? 'block' : 'none';
+  document.getElementById('heroSection').style.display = tab === 'launch' ? 'block' : 'none';
+
+  document.getElementById('tab-launch').className = 'tab' + (tab === 'launch' ? ' active' : '');
+  document.getElementById('tab-explore').className = 'tab' + (tab === 'explore' ? ' active' : '');
+
+  if (tab === 'explore') renderCollections(collections);
+  window.scrollTo(0, 0);
+}
+
+// =========================================================
+// LAUNCH / PROMPT
+// =========================================================
+function onPromptChange() {
+  const val = document.getElementById('promptInput').value;
+  document.getElementById('charCount').textContent = val.length;
+  updatePreview();
+  checkLaunchReady();
+}
+
+function clearPrompt() {
+  document.getElementById('promptInput').value = '';
+  document.getElementById('charCount').textContent = '0';
+  updatePreview();
+  checkLaunchReady();
+}
+
+function setPrompt(text) {
+  document.getElementById('promptInput').value = text;
+  document.getElementById('charCount').textContent = text.length;
+  updatePreview();
+  checkLaunchReady();
+}
+
+function updatePreview() {
+  const prompt = document.getElementById('promptInput').value;
+  const name = document.getElementById('collName').value || 'Your Collection';
+  const royalty = document.getElementById('royaltyInput').value || '5';
+  document.getElementById('previewName').textContent = name;
+  document.getElementById('previewPromptText').textContent = prompt || 'Enter a prompt to see preview…';
+  document.getElementById('prevRoyalty').textContent = royalty + '%';
+}
+
+function checkLaunchReady() {
+  const prompt = document.getElementById('promptInput').value.trim();
+  document.getElementById('launchBtn').disabled = !(isConnected && prompt.length > 10);
+}
+
+function handleFileUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('uploadZone').classList.add('has-file');
+  document.getElementById('uploadIcon').textContent = '✅';
+  document.getElementById('uploadTitle').textContent = file.name;
+  document.getElementById('uploadSub').textContent = `${(file.size/1024).toFixed(1)}KB · AI will use as style reference`;
+}
+
+// =========================================================
+// LAUNCH COLLECTION (simulated)
+// =========================================================
+async function launchCollection() {
+  if (!isConnected) { showToast("Connect wallet first", "error"); return; }
+  const prompt = document.getElementById('promptInput').value.trim();
+  if (!prompt) { showToast("Enter a prompt first", "error"); return; }
+
+  document.getElementById('launchBtn').disabled = true;
+  document.getElementById('launchTxRow').classList.add('show');
+  document.getElementById('launchTxText').textContent = 'Approving 60 $BANKR…';
+
+  await sleep(1500);
+  document.getElementById('launchTxText').textContent = 'Deploying contract on Base…';
+  await sleep(2000);
+  document.getElementById('launchTxRow').classList.remove('show');
+
+  // Show generating overlay
+  showGenerating();
+}
+
+async function showGenerating() {
+  const overlay = document.getElementById('genOverlay');
+  overlay.classList.add('show');
+  const bar = document.getElementById('genBar');
+  const count = document.getElementById('genCount');
+  const current = document.getElementById('genCurrent');
+  const emojis = ['🎨','🖌️','✨','🎭','🌟','💫','🔮','🎪'];
+  const frames = [
+    '🐉','⚔️','🌆','🎨','🚀','💀','🧙','👾',
+    '🌊','⚡','🔥','❄️','🌿','💎','🏆','🎭'
+  ];
+
+  for (let i = 0; i <= 1000; i += Math.floor(Math.random() * 15) + 5) {
+    const pct = Math.min((i / 1000) * 100, 100);
+    bar.style.width = pct + '%';
+    count.textContent = `${Math.min(i, 1000)} / 1000`;
+    current.textContent = frames[Math.floor(Math.random() * frames.length)];
+    await sleep(80);
+    if (i >= 1000) break;
+  }
+  bar.style.width = '100%';
+  count.textContent = '1000 / 1000';
+  await sleep(500);
+  overlay.classList.remove('show');
+
+  // Add new collection
+  const name = document.getElementById('collName').value || 'MY COLLECTION';
+  const prompt = document.getElementById('promptInput').value;
+  const royalty = parseInt(document.getElementById('royaltyInput').value) || 5;
+  collections.unshift({
+    id: collections.length + 1,
+    name: name.toUpperCase(),
+    emoji: '✨',
+    prompt, creator: walletAddress.slice(0,6)+'...'+walletAddress.slice(-4),
+    minted: 0, supply: 1000, price: 1, royalty, hot: false, new: true,
+    colors: ['#0d1a2a','#1a0d2a','#2a1a0d','#0d2a1a']
+  });
+
+  showToast("Collection launched! 🎉", "success");
+  document.getElementById('launchBtn').disabled = false;
+
+  // Switch to explore
+  switchTab('explore');
+}
+
+// =========================================================
+// EXPLORE
+// =========================================================
+function renderCollections(data) {
+  const grid = document.getElementById('collectionsGrid');
+  grid.innerHTML = data.map(c => {
+    const pct = (c.minted / c.supply * 100).toFixed(1);
+    return `
+    <div class="coll-card" onclick="openCollection(${c.id})">
+      <div class="coll-cover">
+        ${c.hot ? '<div class="hot-badge">🔥 HOT</div>' : ''}
+        ${c.new ? '<div class="new-badge">✨ NEW</div>' : ''}
+        <div class="coll-grid">
+          ${c.colors.map((col, i) => `
+            <div class="coll-grid-item" style="background:${col}">
+              ${(emojiSets[c.id] || emojiSets[1])[i] || c.emoji}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+      <div class="coll-body">
+        <div class="coll-name">${c.name}</div>
+        <div class="coll-prompt-preview">"${c.prompt}"</div>
+        <div class="coll-footer">
+          <span class="coll-minted">${c.minted}/1000</span>
+          <div class="coll-progress-mini">
+            <div class="coll-progress-fill" style="width:${pct}%"></div>
+          </div>
+          <span class="coll-price-badge">${c.price} $B</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function setFilter(el, filter) {
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  let filtered = collections;
+  if (filter === 'hot') filtered = collections.filter(c => c.hot);
+  else if (filter === 'new') filtered = collections.filter(c => c.new);
+  else if (filter === 'ending') filtered = collections.filter(c => c.minted > 800);
+  renderCollections(filtered);
+}
+
+// =========================================================
+// COLLECTION DETAIL
+// =========================================================
+function openCollection(id) {
+  const c = collections.find(x => x.id === id);
+  if (!c) return;
+  activeCollection = c;
+
+  document.getElementById('detailName').textContent = c.name;
+  document.getElementById('detailCreator').textContent = c.creator;
+  document.getElementById('detailPrompt').textContent = c.prompt;
+  document.getElementById('dsMinted').textContent = c.minted;
+  document.getElementById('dsPrice').textContent = c.price + ' $B';
+  document.getElementById('dsRoyalty').textContent = c.royalty + '%';
+  document.getElementById('nftGridStatus').textContent = `${c.minted} sold · ${c.supply - c.minted} available`;
+
+  // Mint sidebar
+  document.getElementById('mintNftId').textContent = `NFT #${c.minted + 1}`;
+  document.getElementById('mintHeroEmoji').textContent = (emojiSets[c.id] || emojiSets[1])[c.minted % 8] || c.emoji;
+  document.getElementById('mintPriceAmount').textContent = c.price;
+  document.getElementById('mintNextPrice').textContent = (c.price + 1) + ' $BANKR';
+  const pct = (c.minted / c.supply * 100).toFixed(1);
+  document.getElementById('mintProgLabel').textContent = `${c.minted} / ${c.supply} minted`;
+  document.getElementById('mintProgPct').textContent = pct + '%';
+  document.getElementById('mintProgFill').style.width = pct + '%';
+
+  // NFT grid (show first 32)
+  const nftsGrid = document.getElementById('nftsGrid');
+  const emojis = emojiSets[c.id] || emojiSets[1];
+  nftsGrid.innerHTML = Array.from({length: Math.min(32, c.supply)}, (_, i) => {
+    const isSold = i < c.minted;
+    return `
+    <div class="nft-thumb ${isSold ? 'sold' : ''}" title="NFT #${i+1} · ${i+1} $BANKR">
+      ${emojis[i % emojis.length]}
+      <span class="nft-num">#${i+1}</span>
+    </div>`;
+  }).join('');
+
+  if (isConnected) {
+    document.getElementById('approveBtn').disabled = isApproved;
+    document.getElementById('mintBtn').disabled = !isApproved;
+  }
+
+  // Switch to collection view (hidden tab)
+  document.getElementById('launchView').style.display = 'none';
+  document.getElementById('exploreView').style.display = 'none';
+  document.getElementById('collectionView').style.display = 'block';
+  document.getElementById('heroSection').style.display = 'none';
+  document.getElementById('tab-launch').className = 'tab';
+  document.getElementById('tab-explore').className = 'tab';
+  window.scrollTo(0, 0);
+}
+
+// =========================================================
+// APPROVE + MINT
+// =========================================================
+async function approveToken() {
+  if (!isConnected) { showToast("Connect wallet first", "error"); return; }
+  document.getElementById('approveBtn').disabled = true;
+  document.getElementById('mintTxRow').classList.add('show');
+  document.getElementById('mintTxText').textContent = 'Approving $BANKR spend…';
+  await sleep(2000);
+  document.getElementById('mintTxRow').classList.remove('show');
+  isApproved = true;
+  document.getElementById('mintBtn').disabled = false;
+  showToast("$BANKR approved ✓", "success");
+}
+
+async function doMint() {
+  if (!isConnected) { showToast("Connect wallet first", "error"); return; }
+  if (!isApproved) { showToast("Approve $BANKR first", "error"); return; }
+  if (!activeCollection) return;
+
+  document.getElementById('mintBtn').disabled = true;
+  document.getElementById('approveBtn').disabled = true;
+  document.getElementById('mintTxRow').classList.add('show');
+  document.getElementById('mintTxText').textContent = `Minting NFT #${activeCollection.minted + 1}…`;
+
+  await sleep(2500);
+  document.getElementById('mintTxRow').classList.remove('show');
+
+  // Update collection state
+  const c = activeCollection;
+  const mintedId = c.minted + 1;
+  const pricePaid = c.price;
+  c.minted++;
+  c.price++;
+
+  // Update UI
+  document.getElementById('dsMinted').textContent = c.minted;
+  document.getElementById('dsPrice').textContent = c.price + ' $B';
+  document.getElementById('mintNftId').textContent = `NFT #${c.minted + 1}`;
+  document.getElementById('mintHeroEmoji').textContent = (emojiSets[c.id] || emojiSets[1])[c.minted % 8];
+  document.getElementById('mintPriceAmount').textContent = c.price;
+  document.getElementById('mintNextPrice').textContent = (c.price + 1) + ' $BANKR';
+  const pct = (c.minted / c.supply * 100).toFixed(1);
+  document.getElementById('mintProgLabel').textContent = `${c.minted} / ${c.supply} minted`;
+  document.getElementById('mintProgPct').textContent = pct + '%';
+  document.getElementById('mintProgFill').style.width = pct + '%';
+  document.getElementById('nftGridStatus').textContent = `${c.minted} sold · ${c.supply - c.minted} available`;
+
+  // Update first sold in grid
+  const thumbs = document.querySelectorAll('.nft-thumb');
+  if (thumbs[mintedId - 1]) thumbs[mintedId - 1].classList.add('sold');
+
+  document.getElementById('mintBtn').disabled = false;
+
+  // Show success modal
+  document.getElementById('modalTitle').textContent = 'MINTED! 🎉';
+  document.getElementById('modalDesc').textContent = `You minted NFT #${mintedId} from "${c.name}" for ${pricePaid} $BANKR. The next buyer will pay ${c.price} $BANKR!`;
+  document.getElementById('modalTag').textContent = `NFT #${mintedId} · ${pricePaid} $BANKR`;
+  document.getElementById('modalBg').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modalBg').classList.remove('show');
+}
+
+// =========================================================
+// UTILS
+// =========================================================
+let toastTimeout;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast show ${type}`;
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => t.classList.remove('show'), 3500);
+}
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// INIT
+updatePreview();
+document.getElementById('royaltyInput').addEventListener('input', () => {
+  document.getElementById('prevRoyalty').textContent = (document.getElementById('royaltyInput').value || '0') + '%';
+});
+document.getElementById('collName').addEventListener('input', updatePreview);
+</script>
+</body>
+</html>
